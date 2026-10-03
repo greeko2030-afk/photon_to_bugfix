@@ -1,4 +1,4 @@
-name: Build and Release Photon Shader
+name: Compile and Release Photon Shader
 
 on:
   push:
@@ -18,14 +18,27 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Process and Zip Shader Files
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Installs Python to run the compiler
+
+      - name: Compile Shader
+        run: |
+          echo "Running build script to compile the shader..."
+          
+          # IMPORTANT: Change 'build.py' if your repo uses a different script name!
+          # Example: python scripts/build.py
+          python build.py
+          
+      - name: Process and Zip Output
         run: |
           mkdir -p release
-          echo "Building and zipping Photon shader files..."
+          echo "Zipping the compiled files..."
           
-          # Zips everything in the current directory into 'Photon.zip'
-          # Excludes repository management files (.git, .github) and documentation
-          zip -r release/Photon.zip . -x "*.git*" "*.github*" "*release*" "*.md" "LICENSE"
+          # Zips the files. If your script outputs to a specific folder (like 'dist/'),
+          # change the '.' to 'dist/' below.
+          zip -r release/Photon.zip . -x "*.git*" "*.github*" "*release*" "*.md" "LICENSE" "build.py"
 
       - name: Upload Artifact for Testing
         uses: actions/upload-artifact@v4
