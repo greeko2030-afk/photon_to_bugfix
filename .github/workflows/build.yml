@@ -1,0 +1,40 @@
+name: Build and Release Shader Pack
+
+on:
+  push:
+    tags:
+      - 'v*' # Runs only when you push a version tag (e.g., v1.1)
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+
+jobs:
+  build-shader:
+    name: Compile and Zip Shader
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Process and Zip Shader Files
+        run: |
+          mkdir -p release
+          echo "Building and zipping shader files..."
+          
+          # Zips everything in the current directory into 'Vanish-Water.zip'
+          # Excludes repository management files (.git, .github) and documentation
+          zip -r release/Vanish-Water.zip . -x "*.git*" "*.github*" "*release*" "*.md" "LICENSE"
+
+      - name: Upload Artifact for Testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vanish-Water-Build
+          path: release/Vanish-Water.zip
+
+      - name: Publish to GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/Vanish-Water.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
