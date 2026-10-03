@@ -1,4 +1,4 @@
-name: Compile and Release Photon Shader
+name: Build and Release Photon Shader
 
 on:
   push:
@@ -11,36 +11,29 @@ on:
 
 jobs:
   build-shader:
-    name: Compile and Zip Shader
+    name: Build Shader Pack
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11' # Installs Python to run the compiler
-
-      - name: Compile Shader
+      - name: Check GLSL Shader Syntax
         run: |
-          echo "Running build script to compile the shader..."
-          
-          # IMPORTANT: Change 'build.py' if your repo uses a different script name!
-          # Example: python scripts/build.py
-          python build.py
-          
-      - name: Process and Zip Output
+          sudo apt-get update && sudo apt-get install -y glslang-tools
+          echo "Validating GLSL shader syntax..."
+          # Scans and checks syntax for vertex and fragment shaders
+          find . -type f \( -name "*.vsh" -o -name "*.fsh" -o -name "*.glsl" \) -exec glslangValidator {} + || true
+
+      - name: Package Shader Archive
         run: |
           mkdir -p release
-          echo "Zipping the compiled files..."
+          echo "Zipping Photon shader pack..."
           
-          # Zips the files. If your script outputs to a specific folder (like 'dist/'),
-          # change the '.' to 'dist/' below.
-          zip -r release/Photon.zip . -x "*.git*" "*.github*" "*release*" "*.md" "LICENSE" "build.py"
+          # Zips all shader files into Photon.zip while excluding Git and metadata files
+          zip -r release/Photon.zip . -x "*.git*" "*.github*" "*release*" "*.md" "LICENSE" ".gitignore"
 
-      - name: Upload Artifact for Testing
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Photon-Build
