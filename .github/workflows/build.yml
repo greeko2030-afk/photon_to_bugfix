@@ -1,10 +1,13 @@
-name: Build and Release Shader Pack
+name: Build and Release Photon Shader
 
 on:
   push:
+    branches:
+      - main
+      - master
     tags:
-      - 'v*' # Runs only when you push a version tag (e.g., v1.1)
-  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+      - 'v*'
+  workflow_dispatch:
 
 jobs:
   build-shader:
